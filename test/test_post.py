@@ -8,9 +8,10 @@ from loguru import logger
 
 def parse_argvs():
     parser = argparse.ArgumentParser(description='exchange_torch2trt')
+    parser.add_argument("--url", type=str, default="http://localhost:10000/worker_generate_stream")
     parser.add_argument("--model_path", type=str, default="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/")
-    parser.add_argument("--prompt", type=str, default="图片中讲了什么内容？")
-    parser.add_argument("--image_file", type=str, default="https://llava-vl.github.io/static/images/view.jpg")
+    parser.add_argument("--prompt", type=str, default="图片<image>中讲了什么内容？")
+    parser.add_argument("--image_file", type=str, default="./img.png")
 
     args = parser.parse_args()
     logger.info('[args] {}'.format(args))
@@ -47,9 +48,21 @@ if __name__ == "__main__":
     # })()
     #
     # eval_model(args)
+    from image_to_base64 import image_to_base64
 
-    response = requests.post(worker_addr + "/worker_generate_stream",
+    base64_string = image_to_base64(args.image_file)
+
+    params = {
+        "model": "llava-v1.6-vicuna-7b",
+        "prompt": args.prompt,
+        "images": [base64_string],
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_new_tokens": 256
+    }
+    response = requests.post(url=args.url,
                              json=params, stream=True, timeout=5)
     for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
         if chunk:
-            yield chunk + b"\0"
+            print(chunk)
+            # yield chunk + b"\0"
