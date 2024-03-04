@@ -12,7 +12,7 @@ def parse_argvs():
     parser.add_argument("--model_path", type=str, default="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/")
     parser.add_argument("--prompt", type=str, default="图片<image>中讲了什么内容？")
     parser.add_argument("--image_file", type=str, default="./img.png")
-    parser.add_argument("--stop_str", type=str, default="")
+    parser.add_argument("--stop", type=str, default="")
 
     args = parser.parse_args()
     logger.info('[args] {}'.format(args))
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         "temperature": 1.0,
         "top_p": 1.0,
         "max_new_tokens": 256,
-        "stop_str": args.stop_str
+        "stop": args.stop
     }
     response = requests.post(url=args.url,
                              json=params, stream=True, timeout=5)
