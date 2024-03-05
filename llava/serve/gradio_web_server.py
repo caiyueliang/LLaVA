@@ -240,13 +240,20 @@ def http_bot(state, model_selector, temperature, top_p, max_new_tokens, request:
     logger.info(f"==== request ====\n{pload}")
 
     pload['images'] = state.get_images()
-
+    
     state.messages[-1][-1] = "▌"
+
+    url = worker_addr + "/worker_generate_stream"
+    logger.warning(f"    [url] {url}")
+    logger.warning(f"[headers] {headers}")
+    # logger.warning(f"  [pload] {pload}")
+    logger.warning(f"  [state] {state}")
+
     yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
 
     try:
         # Stream output
-        response = requests.post(worker_addr + "/worker_generate_stream",
+        response = requests.post(url,
             headers=headers, json=pload, stream=True, timeout=10)
         for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
             if chunk:
