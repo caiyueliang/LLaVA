@@ -4,11 +4,13 @@ ARG workdir=/workspace/taichu/
 RUN mkdir -p ${workdir}
 WORKDIR ${workdir}
 
-RUN pip install --upgrade pip
-RUN pip install llava-torch==1.2.2.post1 -i https://pypi.douban.com/simple/
+COPY taichu/requirements.txt requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+
 COPY . llava
 RUN cd llava && \
-    pip install -e . -i https://pypi.douban.com/simple/
+    pip install -e . -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
 
 # COPY vllm/taichu/entrypoint.sh entrypoint.sh
