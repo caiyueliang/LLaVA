@@ -122,7 +122,7 @@ class ModelWorker:
 
     @torch.inference_mode()
     def generate_stream(self, params):
-        logger.info("[generate_stream] params: {}".format(params))
+        # logger.info("[generate_stream] params: {}".format(params))
         tokenizer, model, image_processor = self.tokenizer, self.model, self.image_processor
 
         prompt = params["prompt"]
@@ -192,7 +192,7 @@ class ModelWorker:
         generated_text = ori_prompt
         for new_text in streamer:
             generated_text += new_text
-            logger.info("[new_text] {} [generated_text] {}".format(new_text, generated_text))
+            # logger.info("[new_text] {} [generated_text] {}".format(new_text, generated_text))
             if generated_text.endswith(stop_str):
                 generated_text = generated_text[:-len(stop_str)]
             yield json.dumps({"text": generated_text, "error_code": 0}).encode() + b"\0"
