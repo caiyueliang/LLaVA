@@ -113,6 +113,8 @@ class Conversation:
         self.messages.append([role, message])
 
     def process_image(self, image, image_process_mode, return_pil=False, image_format='PNG', max_len=1344, min_len=672):
+        print(f"[image] {image}")
+        print(f"[image] {image_process_mode}")
         if image_process_mode == "Pad":
             def expand2square(pil_img, background_color=(122, 116, 104)):
                 width, height = pil_img.size
@@ -133,6 +135,7 @@ class Conversation:
             image = image.resize((336, 336))
         else:
             raise ValueError(f"Invalid image_process_mode: {image_process_mode}")
+        
         if max(image.size) > max_len:
             max_hw, min_hw = max(image.size), min(image.size)
             aspect_ratio = max_hw / min_hw

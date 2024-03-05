@@ -2,21 +2,24 @@ import time
 import json
 import argparse
 import requests
-from llava.model.builder import load_pretrained_model
-from llava.mm_utils import get_model_name_from_path
-from llava.eval.run_llava import eval_model
 from loguru import logger
+import base64
 
 headers = {"User-Agent": "LLaVA Client"}
 
+def image_to_base64(image_file):
+    with open(image_file, 'rb') as image_file:
+        image_data = image_file.read()
+    # 将图像数据编码为Base64字符串
+    base64_string = base64.b64encode(image_data).decode('utf-8')
+    return base64_string
 
 def parse_argvs():
-    parser = argparse.ArgumentParser(description='exchange_torch2trt')
+    parser = argparse.ArgumentParser(description='test post')
     parser.add_argument("--url", type=str, default="http://localhost:40000/worker_generate_stream")
     parser.add_argument("--model_path", type=str, default="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/")
     parser.add_argument("--question", type=str, default="图片中讲了什么内容？")
     parser.add_argument("--image_file", type=str, default="./img.png")
-    parser.add_argument("--stop", type=str, default="")
 
     args = parser.parse_args()
     logger.info('[args] {}'.format(args))
@@ -27,11 +30,9 @@ def parse_argvs():
 if __name__ == "__main__":
     parser, args = parse_argvs()
 
-    from image_to_base64 import image_to_base64
+    base64_string = image_to_base64(image_file=args.image_file)
+    images = [base64_string]
 
-    base64_string = image_to_base64(args.image_file)
-
-    
     # Make requests
     prompt = "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions. USER: <image>\n{question} ASSISTANT:".format(question=args.question)
     pload = {
@@ -41,14 +42,14 @@ if __name__ == "__main__":
         "top_p": 0.7,
         "max_new_tokens": 1024,
         "stop": "</s>",
-        "images": [base64_string],
+        "images": [],
     }
-    logger.info(f"==== request ====\n{pload}")
+    logger.info(f"[headers] {headers}")
+    logger.info(f"  [pload] {pload}")
 
-    # pload['images'] = state.get_images()
+    logger.info(f"==== request ====\n")
 
-    logger.warning(f"[headers] {headers}")
-    # logger.warning(f"  [pload] {pload}")
+    pload['images'] = images
 
     response = requests.post(url=args.url,
             headers=headers, json=pload, stream=True, timeout=10)
