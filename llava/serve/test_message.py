@@ -25,7 +25,12 @@ def main():
     if worker_addr == "":
         return
 
-    conv = default_conversation.copy()
+    # conv = default_conversation.copy()
+    from llava import conversation
+    # conv = conversation.conv_llava_v1.copy()
+    # conv = conversation.conv_llava_v1_mmtag.copy()
+    conv = conversation.conv_chatml_direct.copy()
+    print("[conv] 111 {}".format(conv))
     conv.append_message(conv.roles[0], args.message)
     prompt = conv.get_prompt()
 
@@ -37,6 +42,7 @@ def main():
         "temperature": 0.7,
         "stop": conv.sep,
     }
+    print("[pload] {}".format(pload))
     response = requests.post(worker_addr + "/worker_generate_stream", headers=headers,
             json=pload, stream=True)
 

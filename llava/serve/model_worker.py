@@ -62,6 +62,7 @@ class ModelWorker:
 
         self.device = device
         logger.info(f"Loading the model {self.model_name} on worker {worker_id} ...")
+        logger.info(f"[model_path] {model_path} ")
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
             model_path, model_base, self.model_name, load_8bit, load_4bit, device=self.device, use_flash_attn=use_flash_attn)
         self.is_multimodal = 'llava' in self.model_name.lower()
@@ -121,6 +122,7 @@ class ModelWorker:
 
     @torch.inference_mode()
     def generate_stream(self, params):
+        logger.info("[generate_stream] params: {}".format(params))
         tokenizer, model, image_processor = self.tokenizer, self.model, self.image_processor
 
         prompt = params["prompt"]
@@ -129,6 +131,8 @@ class ModelWorker:
         num_image_tokens = 0
         if images is not None and len(images) > 0 and self.is_multimodal:
             if len(images) > 0:
+                logger.info("[generate_stream] prompt.count(DEFAULT_IMAGE_TOKEN): {}, DEFAULT_IMAGE_TOKEN: {}".format(
+                    prompt.count(DEFAULT_IMAGE_TOKEN), DEFAULT_IMAGE_TOKEN))
                 if len(images) != prompt.count(DEFAULT_IMAGE_TOKEN):
                     raise ValueError("Number of images does not match number of <image> tokens in prompt")
 
@@ -188,6 +192,7 @@ class ModelWorker:
         generated_text = ori_prompt
         for new_text in streamer:
             generated_text += new_text
+            logger.info("[new_text] {} [generated_text] {}".format(new_text, generated_text))
             if generated_text.endswith(stop_str):
                 generated_text = generated_text[:-len(stop_str)]
             yield json.dumps({"text": generated_text, "error_code": 0}).encode() + b"\0"
@@ -197,21 +202,24 @@ class ModelWorker:
             for x in self.generate_stream(params):
                 yield x
         except ValueError as e:
-            print("Caught ValueError:", e)
+            logger.exception(e)
+            # print("Caught ValueError:", e)
             ret = {
                 "text": server_error_msg,
                 "error_code": 1,
             }
             yield json.dumps(ret).encode() + b"\0"
         except torch.cuda.CudaError as e:
-            print("Caught torch.cuda.CudaError:", e)
+            logger.exception(e)
+            # print("Caught torch.cuda.CudaError:", e)
             ret = {
                 "text": server_error_msg,
                 "error_code": 1,
             }
             yield json.dumps(ret).encode() + b"\0"
         except Exception as e:
-            print("Caught Unknown Error", e)
+            logger.exception(e)
+            # print("Caught Unknown Error", e)
             ret = {
                 "text": server_error_msg,
                 "error_code": 1,

@@ -57,7 +57,7 @@ if __name__ == "__main__":
         "model": "llava-v1.6-vicuna-7b",
         "prompt": args.prompt,
         "images": [base64_string],
-        "temperature": 1.0,
+        "temperature": 0,
         "top_p": 1.0,
         "max_new_tokens": 256,
         "stop": args.stop

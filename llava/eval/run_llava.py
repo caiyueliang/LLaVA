@@ -81,7 +81,8 @@ def eval_model(args):
         conv_mode = "mpt"
     else:
         conv_mode = "llava_v0"
-
+    print("[conv_mode] {}".format(conv_mode))
+    
     if args.conv_mode is not None and conv_mode != args.conv_mode:
         print(
             "[WARNING] the auto inferred conversation mode is {}, while `--conv-mode` is {}, using {}".format(

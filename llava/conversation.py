@@ -31,6 +31,9 @@ class Conversation:
 
     def get_prompt(self):
         messages = self.messages
+        print("[get_prompt] messages: {}, type(messages[0][1]): {}".format(messages, type(messages[0][1])))
+        print("[get_prompt] version: {}".format(self.version))
+
         if len(messages) > 0 and type(messages[0][1]) is tuple:
             messages = self.messages.copy()
             init_role, init_msg = messages[0].copy()
