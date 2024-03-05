@@ -5,8 +5,8 @@ RUN mkdir -p ${workdir}
 WORKDIR ${workdir}
 
 COPY taichu/requirements.txt requirements.txt
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple/
+RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
 COPY . llava
 RUN cd llava && \
