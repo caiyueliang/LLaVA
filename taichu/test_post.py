@@ -55,14 +55,14 @@ if __name__ == "__main__":
 
     pload['images'] = images
 
-    response = requests.post(url=args.url,
-            headers=headers, json=pload, stream=True)
+    response = requests.post(url=args.url, headers=headers, json=pload, stream=True)
     for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
             if chunk:
                 data = json.loads(chunk.decode())
                 if data["error_code"] == 0:
-                    output = data["text"][len(prompt):].strip()
-                    print(output)
+                    cur = data["text"][len(prompt):].strip()
+                    prompt = prompt + cur
+                    print(cur, end="", flush=True)
                 else:
                     output = data["text"] + f" (error_code: {data['error_code']})"
                     print(output)
