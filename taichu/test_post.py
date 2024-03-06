@@ -52,7 +52,7 @@ if __name__ == "__main__":
     pload['images'] = images
 
     response = requests.post(url=args.url,
-            headers=headers, json=pload, stream=True, timeout=10)
+            headers=headers, json=pload, stream=True)
     for chunk in response.iter_lines(decode_unicode=False, delimiter=b"\0"):
             if chunk:
                 data = json.loads(chunk.decode())
