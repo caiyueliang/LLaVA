@@ -20,6 +20,10 @@ def parse_argvs():
     parser.add_argument("--model_path", type=str, default="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/")
     parser.add_argument("--question", type=str, default="图片中讲了什么内容？")
     parser.add_argument("--image_file", type=str, default="./img.png")
+    parser.add_argument("--temperature", type=float, default=0.2)
+    parser.add_argument("--top_p", type=float, default=0.7)
+    parser.add_argument("--max_new_tokens", type=str, default=1024)
+    parser.add_argument("--stop", type=str, default="</s>")
 
     args = parser.parse_args()
     logger.info('[args] {}'.format(args))
@@ -38,10 +42,10 @@ if __name__ == "__main__":
     pload = {
         "model": "llava-v1.6-vicuna-7b",
         "prompt": prompt,
-        "temperature": 0.2,
-        "top_p": 0.7,
-        "max_new_tokens": 1024,
-        "stop": "</s>",
+        "temperature": args.temperature,
+        "top_p": args.top_p,
+        "max_new_tokens": args.max_new_tokens,
+        "stop": args.stop,
         "images": [],
     }
     logger.info(f"[headers] {headers}")
