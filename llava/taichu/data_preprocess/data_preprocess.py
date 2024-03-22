@@ -10,7 +10,7 @@ class DataPreprocess(object):
         pass
 
     def sample_preset_data(self, src_lines: list, preset_lines: list, preset_data_ratio: float) -> list:
-        logger.info("[src_lines] len: {}; [preset_lines] len: {}; [ratio] {}".format(
+        logger.info("[sample_preset_data] len: {}; [preset_lines] len: {}; [ratio] {}".format(
             len(src_lines), len(preset_lines), preset_data_ratio))
 
         num = int(len(src_lines) * preset_data_ratio)
@@ -18,51 +18,10 @@ class DataPreprocess(object):
         preset_lines = random.sample(preset_lines, num)
 
         src_lines = src_lines + preset_lines
-        logger.info("[src_lines] len: {}; [preset_lines] len: {}; [ratio] {}".format(
+        logger.info("[sample_preset_data] len: {}; [preset_lines] len: {}; [ratio] {}".format(
             len(src_lines), len(preset_lines), preset_data_ratio))
         return src_lines
 
-
-    def data_exchange(self, src_data_list: list):
-        new_data_list = list()
-        src_data_len = len(src_data_list)
-        logger.info("[data_exchange] src_data_len: {}".format(src_data_len))
-
-        i = 0
-        for conversation_text in src_data_list:
-            try:
-                if i == 0:
-                    logger.info("[data_exchange][conversation_text] {}".format(conversation_text))
-                conversation_dict = json.loads(conversation_text)
-                new_conversation_list = list()
-                if i == 0:
-                    logger.info("[data_exchange][conversation_dict] before: {}".format(conversation_dict))
-
-                if "conversations" in conversation_dict.keys():
-                    for dialog_dict in conversation_dict["conversations"]:
-                        if dialog_dict["from"] == "question":
-                            new_conversation_list.append({"role": "user", "content": dialog_dict["value"]})
-                        elif dialog_dict["from"] == "answer":
-                            new_conversation_list.append({"role": "assistant", "content": dialog_dict["value"]})
-                        else:
-                            logger.warning("[data_exchange][dialog_dict]{}，不为：question 或 answer".format(dialog_dict))
-                else:
-                    logger.warning("[data_exchange][conversation_dict]{}，不存在：conversations".format(conversation_dict))
-
-                conversation_dict["conversations"] = new_conversation_list
-                if i == 0:
-                    logger.info("[data_exchange][conversation_dict] after: {}".format(conversation_dict))
-
-                i += 1
-                new_data_list.append(conversation_dict)
-            except Exception as e:
-                logger.exception(e)
-                logger.info("[data_exchange][conversation_text] {}".format(conversation_text))
-
-        logger.info("[data_exchange] finish, src_data_len: {}, new_data_len: {}".format(
-            src_data_len, len(new_data_list)))
-
-        return new_data_list
 
     def data_list_to_dict(self, data_list):
         data_dict = dict()
@@ -74,6 +33,9 @@ class DataPreprocess(object):
         return data_dict
 
 
+    def data_exchange(self, src_data_list: list) -> list:
+        raise NotImplementedError("subclass must override data_exchange")
+    
     def data_preprocess(self, input_path, save_json=False, output_path=None, preset_data_path=None, preset_data_ratio=1.0):
         if os.path.exists(input_path):
             with open(input_path, mode="r", encoding="utf-8") as fr:
@@ -87,19 +49,18 @@ class DataPreprocess(object):
                                                             preset_lines=preset_lines,
                                                             preset_data_ratio=preset_data_ratio)
                 else:
-                    logger.warning("[preprocess] preset_data_path: {}，文件不存在".format(preset_data_path))
+                    logger.warning("[data_preprocess] preset_data_path: {}，文件不存在".format(preset_data_path))
 
             new_data_list = self.data_exchange(src_data_list=src_lines)
             if save_json and output_path:
                 with open(output_path, mode="w", encoding="utf-8") as fw:
                     json.dump(obj=new_data_list, fp=fw, ensure_ascii=False, indent=4)
-                logger.info("[preprocess] save finish, output_path: {}".format(output_path))
-            logger.info("[preprocess] exchange finish")
+                logger.info("[data_preprocess] save finish, output_path: {}".format(output_path))
+            logger.info("[data_preprocess] exchange finish")
             return new_data_list
         else:
-            logger.warning("[preprocess] input_path: {}，文件不存在".format(input_path))
+            logger.warning("[data_preprocess] input_path: {}，文件不存在".format(input_path))
 
-class LLMDataPreprocess(DataPreprocess)
 
 def parse_argvs():
     parser = argparse.ArgumentParser(description='data preprocess')
@@ -117,4 +78,4 @@ if __name__ == "__main__":
     parser, args = parse_argvs()
 
     # replace_dict = {"question": "user", "answer": "assistant"}
-    data_preprocess(input_path=args.input_data, output_path=args.output_data)
+    DataPreprocess().data_preprocess(input_path=args.input_data, output_path=args.output_data)
