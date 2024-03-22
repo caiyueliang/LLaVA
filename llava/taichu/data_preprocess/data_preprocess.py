@@ -61,21 +61,3 @@ class DataPreprocess(object):
         else:
             logger.warning("[data_preprocess] input_path: {}，文件不存在".format(input_path))
 
-
-def parse_argvs():
-    parser = argparse.ArgumentParser(description='data preprocess')
-    parser.add_argument("--input_data", type=str, default="./data/开发数据集统一格式/07-医疗问诊/result.json")
-    parser.add_argument("--output_data", type=str, default="./result_temp.json")
-    # parser.add_argument("--replace_dict", type={}, default={"question": "user", "answer": "assistant"})
-
-    args = parser.parse_args()
-    logger.info('[args] {}'.format(args))
-
-    return parser, args
-
-
-if __name__ == "__main__":
-    parser, args = parse_argvs()
-
-    # replace_dict = {"question": "user", "answer": "assistant"}
-    DataPreprocess().data_preprocess(input_path=args.input_data, output_path=args.output_data)
