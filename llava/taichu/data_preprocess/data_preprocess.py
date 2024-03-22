@@ -36,7 +36,7 @@ class DataPreprocess(object):
     def data_exchange(self, src_data_list: list) -> list:
         raise NotImplementedError("subclass must override data_exchange")
     
-    def data_preprocess(self, input_path,  output_path=None, save_json=False, preset_data_path=None, preset_data_ratio=1.0):
+    def data_preprocess(self, input_path,  output_path=None, preset_data_path=None, preset_data_ratio=1.0):
         if os.path.exists(input_path):
             with open(input_path, mode="r", encoding="utf-8") as fr:
                 src_lines = fr.readlines()
@@ -56,7 +56,7 @@ class DataPreprocess(object):
             new_data_list = self.data_exchange(src_data_list=src_lines)
 
             # 保存数据（可选）
-            if save_json and output_path:
+            if output_path:
                 with open(output_path, mode="w", encoding="utf-8") as fw:
                     json.dump(obj=new_data_list, fp=fw, ensure_ascii=False, indent=4)
                 logger.info("[data_preprocess] save finish, output_path: {}".format(output_path))

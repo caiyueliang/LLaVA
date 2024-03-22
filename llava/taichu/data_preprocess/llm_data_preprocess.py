@@ -56,7 +56,7 @@ class LLMDataPreprocess(DataPreprocess):
 def parse_argvs():
     parser = argparse.ArgumentParser(description='data preprocess')
     parser.add_argument("--input_data", type=str, default="/mnt/publish-data/train_data/llm_data_2/weather/result.json")
-    parser.add_argument("--output_data", type=str, default="./result_temp.json")
+    parser.add_argument("--output_data", type=str, default="./result_llm_temp.json")
     # parser.add_argument("--replace_dict", type={}, default={"question": "user", "answer": "assistant"})
 
     args = parser.parse_args()
