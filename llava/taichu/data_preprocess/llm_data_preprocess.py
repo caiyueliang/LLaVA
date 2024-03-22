@@ -10,6 +10,7 @@ from data_preprocess import DataPreprocess
 class LLMDataPreprocess(DataPreprocess):
     def __init__(self) -> None:
         super().__init__()
+        self.input_file_is_json = False
 
     def data_exchange(self, src_data_list: list):
         new_data_list = list()

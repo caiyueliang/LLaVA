@@ -7,6 +7,7 @@ from loguru import logger
 
 class DataPreprocess(object):
     def __init__(self) -> None:
+        self.input_file_is_json = False
         pass
 
     def sample_preset_data(self, src_lines: list, preset_lines: list, preset_data_ratio: float) -> list:
@@ -36,10 +37,14 @@ class DataPreprocess(object):
     def data_exchange(self, src_data_list: list) -> list:
         raise NotImplementedError("subclass must override data_exchange")
     
-    def data_preprocess(self, input_path,  output_path=None, preset_data_path=None, preset_data_ratio=1.0):
+    def data_preprocess(self, input_path, output_path=None, preset_data_path=None, preset_data_ratio=1.0):
         if os.path.exists(input_path):
-            with open(input_path, mode="r", encoding="utf-8") as fr:
-                src_lines = fr.readlines()
+            if self.input_file_is_json is False:
+                with open(input_path, mode="r", encoding="utf-8") as fr:
+                    src_lines = fr.readlines()
+            else:
+                with open(input_path, mode="r", encoding="utf-8") as fr:
+                    src_lines = json.load(fp=fr)
 
             # 如果preset_data_path不为空，则会对数据进行扩展
             if preset_data_path is not None:            
