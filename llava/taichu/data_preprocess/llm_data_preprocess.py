@@ -1,0 +1,52 @@
+import json
+import os
+import random
+import pandas as pd
+from loguru import logger
+
+from data_preprocess import DataPreprocess
+
+class LLMDataPreprocess(DataPreprocess):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def data_exchange(self, src_data_list: list):
+        new_data_list = list()
+        src_data_len = len(src_data_list)
+        logger.info("[data_exchange] src_data_len: {}".format(src_data_len))
+
+        i = 0
+        for conversation_text in src_data_list:
+            try:
+                if i == 0:
+                    logger.info("[data_exchange][conversation_text] {}".format(conversation_text))
+                conversation_dict = json.loads(conversation_text)
+                new_conversation_list = list()
+                if i == 0:
+                    logger.info("[data_exchange][conversation_dict] before: {}".format(conversation_dict))
+
+                if "conversations" in conversation_dict.keys():
+                    for dialog_dict in conversation_dict["conversations"]:
+                        if dialog_dict["from"] == "question":
+                            new_conversation_list.append({"role": "user", "content": dialog_dict["value"]})
+                        elif dialog_dict["from"] == "answer":
+                            new_conversation_list.append({"role": "assistant", "content": dialog_dict["value"]})
+                        else:
+                            logger.warning("[data_exchange][dialog_dict]{}，不为：question 或 answer".format(dialog_dict))
+                else:
+                    logger.warning("[data_exchange][conversation_dict]{}，不存在：conversations".format(conversation_dict))
+
+                conversation_dict["conversations"] = new_conversation_list
+                if i == 0:
+                    logger.info("[data_exchange][conversation_dict] after: {}".format(conversation_dict))
+
+                i += 1
+                new_data_list.append(conversation_dict)
+            except Exception as e:
+                logger.exception(e)
+                logger.info("[data_exchange][conversation_text] {}".format(conversation_text))
+
+        logger.info("[data_exchange] finish, src_data_len: {}, new_data_len: {}".format(
+            src_data_len, len(new_data_list)))
+
+        return new_data_list
