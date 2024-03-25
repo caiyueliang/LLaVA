@@ -67,7 +67,7 @@ class ModelArguments:
     mm_vision_select_feature: Optional[str] = field(default="patch")
 
     # TODO: taichu
-    pretrained_model_path: Optional[str] = field(default="Taichu_1.8B_Chat")
+    pretrained_model_path: Optional[str] = field(default=None)
 
 
 @dataclass
@@ -812,6 +812,8 @@ def train(attn_implementation=None):
     # TODO: taichu
     if training_args.output_path:
         training_args.output_dir = training_args.output_path
+    if model_args.pretrained_model_path:
+        model_args.model_name_or_path = model_args.pretrained_model_path
 
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
