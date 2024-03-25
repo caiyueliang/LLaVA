@@ -36,7 +36,7 @@ from llava.model import *
 from llava.mm_utils import tokenizer_image_token
 from llava.taichu.save_loss_call_back import SaveLossCallback
 from llava.taichu.data_preprocess.llava_data_preprocess import LlavaDataPreprocess
-from llava.taichu.utils import merge_save_model
+from llava.taichu.utils import merge_save_model, export_model
 from loguru import logger
 
 from PIL import Image
@@ -1040,10 +1040,15 @@ def train(attn_implementation=None):
             model.save_pretrained(tmp_output_path, state_dict=state_dict)
             torch.save(non_lora_state_dict, os.path.join(tmp_output_path, 'non_lora_trainables.bin'))
 
-            merge_save_model(model_base=model_args.model_name_or_path,
-                             path_to_adapter=tmp_output_path,
-                             new_model_directory=training_args.output_dir
-                             )
+            # merge_save_model(model_base=model_args.model_name_or_path,
+            #                  path_to_adapter=tmp_output_path,
+            #                  new_model_directory=training_args.output_dir
+            #                  )
+            export_model(
+                model_path=tmp_output_path, 
+                model_base=model_args.model_name_or_path, 
+                export_dir=training_args.output_dir
+            )
     else:
         safe_save_model_for_hf_trainer(trainer=trainer,
                                        output_dir=training_args.output_dir)

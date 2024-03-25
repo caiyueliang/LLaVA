@@ -59,8 +59,7 @@ def export_model(model_path, model_base, export_dir, model_name="llava-v1.6-7b-l
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path=model_path,
         model_base=model_base,
-        model_name=model_name,
-        device="cpu"
+        model_name=model_name
     )
     
     model.save_pretrained(export_dir, 
