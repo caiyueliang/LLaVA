@@ -810,10 +810,13 @@ def train(attn_implementation=None):
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
     # TODO: taichu
-    if training_args.output_path:
+    if training_args.output_path is not None:
         training_args.output_dir = training_args.output_path
-    if model_args.pretrained_model_path:
+    if model_args.pretrained_model_path is not None:
         model_args.model_name_or_path = model_args.pretrained_model_path
+    # if data_args.image_folder is None and os.path.isdir(data_args.data_path):
+    #     data_args.image_folder = data_args.data_path
+    #     data_args.data_path = os.path.join(data_args.data_path, "result.json")
 
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
