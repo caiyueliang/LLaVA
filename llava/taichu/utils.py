@@ -5,6 +5,9 @@ from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from llava import LlavaLlamaForCausalLM
 from llava.model.language_model.llava_llama import LlavaConfig
+from llava.mm_utils import get_model_name_from_path
+from llava.model.builder import load_pretrained_model
+
 
 def merge_save_model(model_base, path_to_adapter, new_model_directory, max_shard_size=4):
     # if trainer.args.should_save and trainer.args.local_rank == 0:
@@ -52,10 +55,34 @@ def merge_save_model(model_base, path_to_adapter, new_model_directory, max_shard
 
         logger.info("[merge_save_model] end")
 
+def export_model(model_path, model_base, export_dir, model_name="llava-v1.6-7b-lora", max_shard_size=4):
+    tokenizer, model, image_processor, context_len = load_pretrained_model(
+        model_path=model_path,
+        model_base=model_base,
+        model_name=model_name,
+        device="cpu"
+    )
+    
+    model.save_pretrained(export_dir, 
+                          max_shard_size="{}GB".format(max_shard_size), 
+                          safe_serialization=True,
+                          trust_remote_code=True)
+    tokenizer.save_pretrained(export_dir)
+
 
 if __name__ == "__main__":
-    merge_save_model(
-         model_base="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/",
-         path_to_adapter="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/", 
-         new_model_directory="/mnt/publish-data/outputs/llava-v1.6-7b-lora/")
+    # merge_save_model(
+    #      model_base="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/",
+    #      path_to_adapter="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/", 
+    #      new_model_directory="/mnt/publish-data/outputs/llava-v1.6-7b-lora/")
 
+    model_path="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/"
+    model_base="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/"
+    # model_name = get_model_name_from_path(model_path)
+    model_name = "llava-v1.6-7b-lora"
+    export_model(
+         model_path=model_path,
+         model_base=model_base,
+         model_name=model_name,
+         export_dir="/mnt/publish-data/outputs/llava-v1.6-7b-lora/"
+    )
