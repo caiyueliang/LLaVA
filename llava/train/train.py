@@ -36,6 +36,7 @@ from llava.model import *
 from llava.mm_utils import tokenizer_image_token
 from llava.taichu.save_loss_call_back import SaveLossCallback
 from llava.taichu.data_preprocess.llava_data_preprocess import LlavaDataPreprocess
+from loguru import logger
 
 from PIL import Image
 
@@ -45,7 +46,8 @@ local_rank = None
 
 def rank0_print(*args):
     if local_rank == 0:
-        print(*args)
+        # print(*args)
+        logger.info(*args)
 
 
 from packaging import version
@@ -810,6 +812,7 @@ def train(attn_implementation=None):
     parser = transformers.HfArgumentParser(
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    local_rank = training_args.local_rank
 
     # TODO: taichu
     if training_args.output_path is not None:
@@ -830,9 +833,7 @@ def train(attn_implementation=None):
             rank0_print("[data_exchange] data_path: {}, 没有以 .json 结尾".format(data_args.data_path))
             exit(99)
         rank0_print("[data_exchange] data_path after: {}".format(data_args.data_path))
-        
 
-    local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
 
     bnb_model_from_pretrained_args = {}
