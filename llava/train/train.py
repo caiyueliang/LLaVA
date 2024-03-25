@@ -65,7 +65,7 @@ class ModelArguments:
     mm_use_im_patch_token: bool = field(default=True)
     mm_patch_merge_type: Optional[str] = field(default='flat')
     mm_vision_select_feature: Optional[str] = field(default="patch")
-    
+
     # TODO: taichu
     pretrained_model_path: Optional[str] = field(default="Taichu_1.8B_Chat")
 
@@ -117,7 +117,11 @@ class TrainingArguments(transformers.TrainingArguments):
     # TODO: taichu
     save_metrics: bool = field(
         default=True,
-        metadata={"help": "save metrics to metrics.json"}
+        metadata={"help": "save metrics"}
+    )
+    output_dir: str = field(
+        default="./output",
+        metadata={"help": "The output directory where the model predictions and checkpoints will be written."},
     )
     output_path: str = field(
         default="./output",
@@ -805,6 +809,10 @@ def train(attn_implementation=None):
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
+    # TODO: taichu
+    if training_args.output_path:
+        training_args.output_dir = training_args.output_path
+
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
 
@@ -978,8 +986,12 @@ def train(attn_implementation=None):
                     args=training_args,
                     **data_module)
 
-    # TODO: taichu. add custom callback
+    # TODO: taichu
     if training_args.save_metrics is True:
+        # delete useless callback
+        trainer.pop_callback(callback=transformers.PrinterCallback)
+        trainer.pop_callback(callback=transformers.ProgressCallback)
+        # add custom callback
         save_loss_callback = SaveLossCallback(
             loss_file_path=os.path.join(training_args.output_dir, "metrics"))
         trainer.add_callback(callback=save_loss_callback)
