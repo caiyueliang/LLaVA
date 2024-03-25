@@ -5,7 +5,7 @@ import pandas as pd
 from loguru import logger
 import argparse
 
-from data_preprocess import DataPreprocess
+from .data_preprocess import DataPreprocess
 
 class LlavaDataPreprocess(DataPreprocess):
     def __init__(self) -> None:

@@ -35,6 +35,7 @@ from llava import conversation as conversation_lib
 from llava.model import *
 from llava.mm_utils import tokenizer_image_token
 from llava.taichu.save_loss_call_back import SaveLossCallback
+from llava.taichu.data_preprocess.llava_data_preprocess import LlavaDataPreprocess
 
 from PIL import Image
 
@@ -78,6 +79,7 @@ class DataArguments:
     is_multimodal: bool = False
     image_folder: Optional[str] = field(default=None)
     image_aspect_ratio: str = 'square'
+    data_exchange: bool = True
 
 
 @dataclass
@@ -814,9 +816,21 @@ def train(attn_implementation=None):
         training_args.output_dir = training_args.output_path
     if model_args.pretrained_model_path is not None:
         model_args.model_name_or_path = model_args.pretrained_model_path
-    # if data_args.image_folder is None and os.path.isdir(data_args.data_path):
-    #     data_args.image_folder = data_args.data_path
-    #     data_args.data_path = os.path.join(data_args.data_path, "result.json")
+    if data_args.image_folder is None and os.path.isdir(data_args.data_path):
+        data_args.image_folder = data_args.data_path
+        data_args.data_path = os.path.join(data_args.data_path, "result.json")
+    if data_args.data_exchange is True:
+        rank0_print("[data_exchange] start data_path before: {}".format(data_args.data_path))
+        if data_args.data_path.endswith(".json"):
+            output_path = "./exchange_result.json"
+            LlavaDataPreprocess().data_preprocess(input_path=data_args.data_path,
+                                                  output_path=output_path)
+            data_args.data_path = output_path
+        else:
+            rank0_print("[data_exchange] data_path: {}, 没有以 .json 结尾".format(data_args.data_path))
+            exit(99)
+        rank0_print("[data_exchange] data_path after: {}".format(data_args.data_path))
+        
 
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
