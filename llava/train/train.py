@@ -34,6 +34,7 @@ from llava.train.llava_trainer import LLaVATrainer
 from llava import conversation as conversation_lib
 from llava.model import *
 from llava.mm_utils import tokenizer_image_token
+from llava.taichu.save_loss_call_back import SaveLossCallback
 
 from PIL import Image
 
@@ -64,6 +65,9 @@ class ModelArguments:
     mm_use_im_patch_token: bool = field(default=True)
     mm_patch_merge_type: Optional[str] = field(default='flat')
     mm_vision_select_feature: Optional[str] = field(default="patch")
+    
+    # TODO: taichu
+    pretrained_model_path: Optional[str] = field(default="Taichu_1.8B_Chat")
 
 
 @dataclass
@@ -110,6 +114,15 @@ class TrainingArguments(transformers.TrainingArguments):
     lora_bias: str = "none"
     mm_projector_lr: Optional[float] = None
     group_by_modality_length: bool = field(default=False)
+    # TODO: taichu
+    save_metrics: bool = field(
+        default=True,
+        metadata={"help": "save metrics to metrics.json"}
+    )
+    output_path: str = field(
+        default="./output",
+        metadata={"help": "The output directory where the model predictions and checkpoints will be written."},
+    )
 
 
 def maybe_zero_3(param, ignore_status=False, name=None):
@@ -840,7 +853,7 @@ def train(attn_implementation=None):
             torch_dtype=(torch.bfloat16 if training_args.bf16 else None),
             **bnb_model_from_pretrained_args
         )
-        
+
     model.config.use_cache = False
 
     if model_args.freeze_backbone:
@@ -964,6 +977,12 @@ def train(attn_implementation=None):
                     tokenizer=tokenizer,
                     args=training_args,
                     **data_module)
+
+    # TODO: taichu. add custom callback
+    if training_args.save_metrics is True:
+        save_loss_callback = SaveLossCallback(
+            loss_file_path=os.path.join(training_args.output_dir, "metrics"))
+        trainer.add_callback(callback=save_loss_callback)
 
     if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
         trainer.train(resume_from_checkpoint=True)
