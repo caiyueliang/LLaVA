@@ -4,7 +4,7 @@ import numpy as np
 from loguru import logger
 from transformers.trainer_callback import TrainerCallback
 
-
+  
 class SaveLossCallback(TrainerCallback):
     def __init__(self, loss_file_path=None):
         self.loss_list = []

@@ -36,6 +36,7 @@ from llava.model import *
 from llava.mm_utils import tokenizer_image_token
 from llava.taichu.save_loss_call_back import SaveLossCallback
 from llava.taichu.data_preprocess.llava_data_preprocess import LlavaDataPreprocess
+from llava.taichu.utils import merge_save_model
 from loguru import logger
 
 from PIL import Image
@@ -1032,9 +1033,17 @@ def train(attn_implementation=None):
             model.named_parameters()
         )
         if training_args.local_rank == 0 or training_args.local_rank == -1:
-            model.config.save_pretrained(training_args.output_dir)
-            model.save_pretrained(training_args.output_dir, state_dict=state_dict)
-            torch.save(non_lora_state_dict, os.path.join(training_args.output_dir, 'non_lora_trainables.bin'))
+            # TODO: taichu
+            tmp_output_path = os.path.join(training_args.output_dir, "tmp")
+
+            model.config.save_pretrained(tmp_output_path)
+            model.save_pretrained(tmp_output_path, state_dict=state_dict)
+            torch.save(non_lora_state_dict, os.path.join(tmp_output_path, 'non_lora_trainables.bin'))
+
+            merge_save_model(model_base=model_args.model_name_or_path,
+                             path_to_adapter=tmp_output_path,
+                             new_model_directory=training_args.output_dir
+                             )
     else:
         safe_save_model_for_hf_trainer(trainer=trainer,
                                        output_dir=training_args.output_dir)
