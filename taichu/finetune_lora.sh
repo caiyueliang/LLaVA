@@ -126,3 +126,7 @@ deepspeed --include localhost:1 llava/train/train_mem.py \
 
 echo "======================================================================"
 echo "[save_model] start ..."
+python taichu/export_model.py \
+ --model_path "${output_path}/tmp/" \
+ --model_base ${pretrained_model_path} \
+ --export_dir ${output_path}

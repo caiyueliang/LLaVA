@@ -1,3 +1,4 @@
+import argparse
 from loguru import logger
 from llava.model.builder import load_pretrained_model
 
@@ -15,19 +16,28 @@ def export_model(model_path, model_base, export_dir, model_name="llava-v1.6-7b-l
     tokenizer.save_pretrained(export_dir)
 
 
-if __name__ == "__main__":
-    # merge_save_model(
-    #      model_base="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/",
-    #      path_to_adapter="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/", 
-    #      new_model_directory="/mnt/publish-data/outputs/llava-v1.6-7b-lora/")
+def parse_argvs():
+    parser = argparse.ArgumentParser(description='test post')
+    parser.add_argument("--model_path", type=str, default="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/")
+    parser.add_argument("--model_base", type=str, default="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/")
+    parser.add_argument("--model_name", type=str, default="llava-v1.6-7b-lora")
+    parser.add_argument("--export_dir", type=str, default="/mnt/publish-data/outputs/llava-v1.6-7b-lora/")
 
-    model_path="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/"
-    model_base="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/"
+    args = parser.parse_args()
+    logger.info('[args] {}'.format(args))
+
+    return parser, args
+
+if __name__ == "__main__":
+    parser, args = parse_argvs()
+
+    # model_path="/mnt/publish-data/outputs/llava-v1.6-7b-lora/tmp/"
+    # model_base="/mnt/publish-data/pretrain_models/llava/llava-v1.6-vicuna-7b/"
     # model_name = get_model_name_from_path(model_path)
-    model_name = "llava-v1.6-7b-lora"
+    # model_name = "llava-v1.6-7b-lora"
     export_model(
-         model_path=model_path,
-         model_base=model_base,
-         model_name=model_name,
-         export_dir="/mnt/publish-data/outputs/llava-v1.6-7b-lora/"
+         model_path=args.model_path,
+         model_base=args.model_base,
+         model_name=args.model_name,
+         export_dir=args.export_dir
     )
