@@ -14,6 +14,8 @@ RUN cd LLaVA && \
     pip install -e . -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
 RUN pip uninstall -y transformer-engine
+RUN pip install deepspeed==0.12.6 -i https://pypi.tuna.tsinghua.edu.cn/simple/
+RUN pip install flash-attn==2.5.6 --no-build-isolation -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
 # COPY vllm/taichu/entrypoint.sh entrypoint.sh
 # RUN chmod +x entrypoint.sh
