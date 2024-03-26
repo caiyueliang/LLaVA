@@ -1044,11 +1044,11 @@ def train(attn_implementation=None):
             #                  path_to_adapter=tmp_output_path,
             #                  new_model_directory=training_args.output_dir
             #                  )
-            export_model(
-                model_path=tmp_output_path, 
-                model_base=model_args.model_name_or_path, 
-                export_dir=training_args.output_dir
-            )
+            # export_model(
+            #     model_path=tmp_output_path, 
+            #     model_base=model_args.model_name_or_path, 
+            #     export_dir=training_args.output_dir
+            # )
     else:
         safe_save_model_for_hf_trainer(trainer=trainer,
                                        output_dir=training_args.output_dir)
