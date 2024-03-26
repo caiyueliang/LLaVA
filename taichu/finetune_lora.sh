@@ -87,8 +87,9 @@ echo "[gradient_accumulation_steps]: ${gradient_accumulation_steps}"
 echo "[learning_rate]: ${learning_rate}"
 echo "[model_max_length]: ${model_max_length}"
 echo "======================================================================"
-
-CUDA_VISIBLE_DEVICES=7 deepspeed llava/train/train_mem.py \
+echo "[train] start ..."
+# CUDA_VISIBLE_DEVICES=7 
+deepspeed --include localhost:1 llava/train/train_mem.py \
     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
     --deepspeed ./scripts/zero3.json \
     --pretrained_model_path ${pretrained_model_path} \
@@ -122,3 +123,6 @@ CUDA_VISIBLE_DEVICES=7 deepspeed llava/train/train_mem.py \
     --dataloader_num_workers 4 \
     --lazy_preprocess True \
     --report_to none
+
+echo "======================================================================"
+echo "[save_model] start ..."
