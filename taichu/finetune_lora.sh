@@ -88,8 +88,8 @@ echo "[learning_rate]: ${learning_rate}"
 echo "[model_max_length]: ${model_max_length}"
 echo "======================================================================"
 echo "[train] start ..."
-# CUDA_VISIBLE_DEVICES=7 
-deepspeed --include localhost:1 llava/train/train_mem.py \
+# --include localhost:1
+deepspeed llava/train/train_mem.py \
     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
     --deepspeed ./scripts/zero3.json \
     --pretrained_model_path ${pretrained_model_path} \
@@ -126,6 +126,7 @@ deepspeed --include localhost:1 llava/train/train_mem.py \
 
 echo "======================================================================"
 echo "[save_model] start ..."
+# CUDA_VISIBLE_DEVICES=1 
 python taichu/export_model.py \
  --model_path "${output_path}/tmp/" \
  --model_base ${pretrained_model_path} \
